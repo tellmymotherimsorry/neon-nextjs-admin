@@ -7,11 +7,14 @@ export default function Home() {
   const [password, setPassword] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
   const [banned, setBanned] = useState<string[]>([])
+  const [mods, setMods] = useState<string[]>([])
   const [newUser, setNewUser] = useState('')
+  const [newMod, setNewMod] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (isAdmin) fetchBanned()
+    if (isAdmin) fetchMods()
   }, [isAdmin])
 
   async function fetchBanned() {
@@ -27,6 +30,16 @@ export default function Home() {
     }
   }
 
+  async function fetchMods() {
+    try {
+      const res = await fetch('/api/mods', { headers: { 'x-read-secret': READ_SECRET } })
+      const data = await res.json()
+      setMods(Array.isArray(data) ? data : [])
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   async function addUser() {
     if (!newUser) return
     await fetch('/api/banned', {
@@ -38,6 +51,17 @@ export default function Home() {
     fetchBanned()
   }
 
+  async function addMod() {
+    if (!newMod) return
+    await fetch('/api/mods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-secret': WRITE_SECRET },
+      body: JSON.stringify({ username: newMod })
+    })
+    setNewMod('')
+    fetchMods()
+  }
+
   async function removeUser(u: string) {
     await fetch('/api/banned', {
       method: 'DELETE',
@@ -45,6 +69,15 @@ export default function Home() {
       body: JSON.stringify({ username: u })
     })
     fetchBanned()
+  }
+
+  async function removeMod(u: string) {
+    await fetch('/api/mods', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'x-secret': WRITE_SECRET },
+      body: JSON.stringify({ username: u })
+    })
+    fetchMods()
   }
 
   async function banAllServers() {
@@ -81,21 +114,43 @@ export default function Home() {
                 style={{ padding: 8, borderRadius: 6, border: '1px solid #223', background: '#071019', color: '#e6eef6' }}
               />
               <button onClick={addUser} style={{ padding: 8, borderRadius: 6, background: '#1db954', color: '#fff', border: 'none' }}>Add</button>
+              <div style={{ width: 24 }} />
+              <input
+                placeholder="Username to mod"
+                value={newMod}
+                onChange={(e) => setNewMod(e.target.value)}
+                style={{ padding: 8, borderRadius: 6, border: '1px solid #223', background: '#071019', color: '#e6eef6' }}
+              />
+              <button onClick={addMod} style={{ padding: 8, borderRadius: 6, background: '#4d79ff', color: '#fff', border: 'none' }}>Add Mod</button>
               <button onClick={() => { setIsAdmin(false); setPassword('') }} style={{ marginLeft: 'auto', padding: 8, borderRadius: 6, background: '#555', color: '#fff', border: 'none' }}>Logout</button>
             </div>
 
-            <div style={{ marginTop: 8 }}>
-              <h2>Ban List</h2>
-              {loading ? <div>Loading...</div> : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              <div>
+                <h2>Ban List</h2>
+                {loading ? <div>Loading...</div> : (
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
+                    {banned.map((u) => (
+                      <li key={u} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+                        <span style={{ flex: 1 }}>{u}</span>
+                        <button onClick={() => removeUser(u)} style={{ padding: 6, borderRadius: 6, background: '#ff4d4f', color: '#fff', border: 'none' }}>Remove</button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div>
+                <h2>Mod List</h2>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {banned.map((u) => (
+                  {mods.map((u) => (
                     <li key={u} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
                       <span style={{ flex: 1 }}>{u}</span>
-                      <button onClick={() => removeUser(u)} style={{ padding: 6, borderRadius: 6, background: '#ff4d4f', color: '#fff', border: 'none' }}>Remove</button>
+                      <button onClick={() => removeMod(u)} style={{ padding: 6, borderRadius: 6, background: '#ff4d4f', color: '#fff', border: 'none' }}>Remove</button>
                     </li>
                   ))}
                 </ul>
-              )}
+              </div>
             </div>
 
             <div style={{ marginTop: 20 }}>
