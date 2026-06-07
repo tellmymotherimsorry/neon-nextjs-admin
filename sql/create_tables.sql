@@ -12,4 +12,10 @@ CREATE TABLE IF NOT EXISTS trigger_state (
   triggered boolean NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS mod_trigger_state (
+  id int PRIMARY KEY CHECK (id = 1),
+  triggered boolean NOT NULL
+);
+
 INSERT INTO trigger_state (id, triggered) VALUES (1, false) ON CONFLICT DO NOTHING;
+INSERT INTO mod_trigger_state (id, triggered) VALUES (1, false) ON CONFLICT DO NOTHING;

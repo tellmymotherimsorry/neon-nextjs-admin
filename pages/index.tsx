@@ -11,6 +11,7 @@ export default function Home() {
   const [newUser, setNewUser] = useState('')
   const [newMod, setNewMod] = useState('')
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     if (isAdmin) fetchBanned()
@@ -81,7 +82,19 @@ export default function Home() {
   }
 
   async function banAllServers() {
-    await fetch('/api/trigger', { method: 'POST', headers: { 'x-secret': WRITE_SECRET } })
+    const res = await fetch('/api/trigger', { method: 'POST', headers: { 'x-secret': WRITE_SECRET } })
+    if (res.ok) {
+      setMessage('Ban trigger sent!')
+      window.setTimeout(() => setMessage(''), 3000)
+    }
+  }
+
+  async function forceModAllServers() {
+    const res = await fetch('/api/modtrigger', { method: 'POST', headers: { 'x-secret': WRITE_SECRET } })
+    if (res.ok) {
+      setMessage('Mod trigger sent!')
+      window.setTimeout(() => setMessage(''), 3000)
+    }
   }
 
   return (
@@ -153,8 +166,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div style={{ marginTop: 20 }}>
+            {message ? <div style={{ marginBottom: 16, color: '#a3ff92' }}>{message}</div> : null}
+            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
               <button onClick={banAllServers} style={{ padding: 10, borderRadius: 6, background: '#ff6b00', color: '#fff', border: 'none' }}>Ban All Servers</button>
+              <button onClick={forceModAllServers} style={{ padding: 10, borderRadius: 6, background: '#6b5cff', color: '#fff', border: 'none' }}>Force Mod All Servers</button>
             </div>
           </div>
         )}
