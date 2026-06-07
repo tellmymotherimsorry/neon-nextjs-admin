@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       const result = await query('SELECT triggered FROM trigger_state WHERE id = 1')
       const triggered = result?.rows?.[0]?.triggered ?? false
-      return res.status(200).setHeader('Content-Type', 'text/plain').send(!!triggered ? 'true' : 'false')
+      return res.status(200).json({ triggered: !!triggered })
     }
 
     const writeHead = req.headers['x-secret'] as string | undefined
