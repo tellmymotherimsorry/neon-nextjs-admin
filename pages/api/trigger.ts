@@ -11,8 +11,6 @@ function badAuth(res: NextApiResponse) {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'GET') {
-      const head = req.headers['x-read-secret'] as string | undefined
-      if (head !== READ_SECRET) return badAuth(res)
       const result = await query('SELECT triggered FROM trigger_state WHERE id = 1')
       const triggered = result?.rows?.[0]?.triggered ?? false
       return res.status(200).json({ triggered: !!triggered })

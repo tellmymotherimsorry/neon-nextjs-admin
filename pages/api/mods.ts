@@ -11,8 +11,6 @@ function badAuth(res: NextApiResponse) {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'GET') {
-      const head = req.headers['x-read-secret'] as string | undefined
-      if (head !== READ_SECRET) return badAuth(res)
       const result = await query('SELECT username FROM mod_users')
       const rows = result?.rows?.map((r: any) => r.username) || []
       return res.status(200).json(rows)
